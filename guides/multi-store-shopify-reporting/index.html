@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-store Shopify reporting: one view across stores, countries and currencies | Delta Point</title>
+  <meta name="description" content="How to combine several Shopify stores, markets and currencies into one honest report: daily exchange rates, time zones, double counting and blended ROAS per market.">
+  <link rel="canonical" href="https://deltapoint.io/guides/multi-store-shopify-reporting/">
+  <meta name="theme-color" content="#5B5EF4">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Delta Point">
+  <meta property="og:title" content="Reporting across several Shopify stores, countries and currencies">
+  <meta property="og:description" content="How to combine several Shopify stores, markets and currencies into one honest report: daily exchange rates, time zones, double counting and blended ROAS per market.">
+  <meta property="og:url" content="https://deltapoint.io/guides/multi-store-shopify-reporting/">
+  <meta property="og:image" content="https://deltapoint.io/icon.png">
+  <meta property="og:image:alt" content="Delta Point logo">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Reporting across several Shopify stores, countries and currencies",
+  "description": "How to combine several Shopify stores, markets and currencies into one honest report: daily exchange rates, time zones, double counting and blended ROAS per market.",
+  "url": "https://deltapoint.io/guides/multi-store-shopify-reporting/",
+  "datePublished": "2026-10-23",
+  "dateModified": "2026-10-23",
+  "image": "https://deltapoint.io/icon.png",
+  "author": {
+    "@type": "Organization",
+    "name": "Delta Point",
+    "url": "https://deltapoint.io"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Wave3, d. o. o.",
+    "url": "https://deltapoint.io",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://deltapoint.io/icon.png"
+    }
+  }
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I see sales from several Shopify stores in one report?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Shopify's own analytics show one store at a time. To combine them, pull the orders from each store, convert them into one reporting currency at daily exchange rates and add them up per day, or use a reporting app that connects all your stores, such as Delta Point."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which exchange rate should I use for reporting?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use the rate for the day each order or ad cost happened, not today's rate. The European Central Bank publishes a free daily reference rate that is widely used; converting each day separately keeps past months from changing when rates move."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I compare markets with platform ROAS or blended ROAS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Blended ROAS. Platform ROAS depends on each platform's attribution and can count the same order more than once. Blended ROAS uses the revenue the store actually made in that market, divided by all ad spend for that market."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is one Shopify store with Markets better than one store per country?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It depends on how different your markets are. One store is simpler to run; separate stores give more freedom over catalogue, prices, payments and teams per country. Either way, report revenue and ad spend per market in one currency."
+      }
+    }
+  ]
+}
+</script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --brand: #5B5EF4; --brand-light: #8183f7; --brand-dark: #4345c0;
+      --bg: #fafafa; --surface: #ffffff; --text: #1a1a2e; --text-secondary: #555;
+      --text-muted: #767676; --border: #e8e8ee; --radius: 12px;
+      --good: #1a7f4b; --good-bg: #e7f6ee; --bad: #b42318; --bad-bg: #fdecea;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text); background: var(--bg); line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--brand); }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: rgba(250,250,250,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border); z-index: 100; padding: 0 16px;
+    }
+    .nav-inner {
+      max-width: 1080px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; height: 60px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .logo span { font-weight: 700; font-size: 16px; letter-spacing: -0.3px; }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links a {
+      color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--brand); }
+    .nav-links a.login { color: var(--brand); font-weight: 600; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-block; background: var(--brand); color: #fff; border: 0; cursor: pointer;
+      padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; font-family: inherit;
+      text-decoration: none; transition: background 0.15s, transform 0.1s;
+    }
+    .btn:hover { background: var(--brand-dark); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--brand); border: 1px solid var(--brand-light); }
+    .btn-ghost:hover { background: #ededfe; }
+    .btn-small { padding: 8px 16px; font-size: 13px; }
+
+    /* SECTIONS */
+    .section { max-width: 1080px; margin: 0 auto; padding: 60px 24px 80px; }
+    .section h2 {
+      font-size: 28px; font-weight: 700; text-align: center;
+      margin-bottom: 12px; letter-spacing: -0.5px;
+    }
+    .section .lead {
+      text-align: center; color: var(--text-secondary); max-width: 560px;
+      margin: 0 auto 40px; font-size: 16px;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+    }
+
+    /* HERO */
+    .hero { max-width: 1080px; margin: 0 auto; padding: 124px 24px 32px; text-align: center; }
+    .badge {
+      display: inline-block; background: #ededfe; color: var(--brand);
+      font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(30px, 4.5vw, 44px); font-weight: 700; line-height: 1.15;
+      letter-spacing: -1px; margin: 0 auto 16px; max-width: 760px;
+    }
+    .hero p { font-size: 17px; color: var(--text-secondary); max-width: 620px; margin: 0 auto; line-height: 1.7; }
+
+    /* ARTICLE */
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 24px 24px; }
+    .article h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; margin: 32px 0 10px; }
+    .article p, .article li { font-size: 15px; color: var(--text-secondary); margin-bottom: 12px; }
+    .article ul { padding-left: 20px; }
+    .formula { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--brand);
+      border-radius: 8px; padding: 12px 16px; margin: 0 0 14px; font-size: 15px; font-weight: 600; color: var(--text); }
+    .faq { max-width: 760px; margin: 0 auto; }
+    .faq details {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px 20px; margin-bottom: 12px;
+    }
+    .faq summary { font-weight: 600; font-size: 15px; cursor: pointer; }
+    .faq details p { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
+
+    /* CTA */
+    .cta-box {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      border-radius: 16px; padding: 56px 32px; color: #fff; text-align: center;
+    }
+    .cta-box h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+    .cta-box p { font-size: 16px; opacity: 0.9; margin: 0 auto 28px; max-width: 520px; }
+    .cta-box .btn { background: #fff; color: var(--brand); }
+    .cta-box .btn:hover { background: #f1f1fe; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 32px 24px; }
+    .footer-inner {
+      max-width: 1080px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-wrap: wrap; gap: 16px 32px;
+    }
+    .company { font-size: 13px; color: var(--text-muted); line-height: 1.7; font-style: normal; }
+    .company strong { color: var(--text-secondary); }
+    .footer-links { display: flex; gap: 8px 24px; flex-wrap: wrap; }
+    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+    .footer-links a:hover { color: var(--brand); }
+
+    @media (max-width: 640px) {
+      .nav-links { gap: 16px; }
+      .nav-links a.wide { display: none; }
+      .hero { padding: 100px 16px 20px; }
+      .hero p { font-size: 15px; }
+      .section { padding: 48px 16px 56px; }
+      .article { padding: 32px 16px 16px; }
+      .cta-box { padding: 40px 20px; }
+      footer { padding: 28px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <img src="/icon.png" alt="" width="32" height="32">
+        <span>Delta Point</span>
+      </a>
+      <div class="nav-links">
+        <a class="wide" href="/#features">Features</a>
+        <a href="/#pricing">Pricing</a>
+        <a class="wide" href="/roas-calculator/">ROAS calculator</a>
+        <a href="https://bi.deltapoint.io" class="login">Client login</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+  <section class="hero">
+    <div class="badge">Guide</div>
+    <h1>Reporting across several Shopify stores, countries and currencies</h1>
+    <p>Selling in more than one market usually means one Shopify store per country, ad accounts per market and a spreadsheet to add it all up. Here is what to watch for when you combine them, and how to get one honest number for the whole business.</p>
+  </section>
+
+  <article class="article">
+    <h2>Why one store per market is common</h2>
+    <p>Many brands that sell across Europe or beyond run a separate Shopify store for each country: each has its own domain, language, prices, payment methods and VAT setup. Shopify Markets can serve several countries from one store, but separate stores remain popular when catalogues, prices or teams differ by market.</p>
+    <p>The catch is reporting. Every store has its own Shopify analytics, every market often has its own Google Ads, Meta and TikTok accounts, and none of them add up to the total on their own.</p>
+
+    <h2>Four things that go wrong when you add it up</h2>
+    <ul>
+      <li><strong>Mixed currencies.</strong> A store in Hungary reports in forints, one in Poland in złoty, one in Czechia in koruna. Summing raw totals gives a meaningless number; every amount needs converting to one reporting currency first.</li>
+      <li><strong>Which exchange rate.</strong> Converting a whole month at today's rate distorts past months. Converting each day at that day's rate, for example the European Central Bank's daily reference rate, keeps history stable.</li>
+      <li><strong>Time zones and "today".</strong> Each store and ad account has its own time zone setting. If they differ, an order at 23:30 can land on different days in different reports, so daily totals never quite match.</li>
+      <li><strong>Double counting from ad platforms.</strong> Adding the revenue every platform reports overstates results, because Google, Meta and TikTok can all claim the same order. Store revenue is the only total that counts each sale once.</li>
+    </ul>
+
+    <h2>The one number to track: blended ROAS per market</h2>
+    <p>Blended ROAS, also called MER (marketing efficiency ratio), divides store revenue by total ad spend. Calculated per market and for the whole business, it answers the questions that matter: which country earns the most per unit of ad spend, and whether marketing as a whole pays off.</p>
+    <div class="formula">Blended ROAS for a market = that market's store revenue ÷ ad spend for that market on all platforms</div>
+    <p>To compare markets fairly, convert revenue and spend into the same currency with the same daily rates, and count each day in the same time zone. Then compare each market's blended ROAS with your break-even ROAS (1 ÷ gross margin), which can differ by market when prices, shipping or VAT do.</p>
+    <p>Try the numbers for one market in the <a href="/roas-calculator/">free ROAS &amp; MER calculator</a>.</p>
+
+    <h2>A simple setup that holds up</h2>
+    <ul>
+      <li>Pick one reporting currency for the whole business and stick with it.</li>
+      <li>Convert every amount at the daily rate for the day it happened.</li>
+      <li>Map every ad account to the market it spends for, so spend and revenue meet per country.</li>
+      <li>Use one time zone per market for daily numbers, the same one the store uses.</li>
+      <li>Judge budgets on blended ROAS per market; use each platform's own ROAS only to compare campaigns inside that platform.</li>
+    </ul>
+    <p>Done by hand this is a weekly spreadsheet job. Delta Point does it automatically: Shopify orders from every store, spend from Google Ads, Meta and TikTok, Klaviyo email results, converted at daily ECB rates and shown per store, market and day, or all together.</p>
+  </article>
+
+  <section class="section" id="faq" style="padding-top: 24px;">
+    <h2>Questions</h2>
+    <p class="lead">Multi-store and multi-currency reporting in short.</p>
+    <div class="faq">
+      <details>
+        <summary>How do I see sales from several Shopify stores in one report?</summary>
+        <p>Shopify's own analytics show one store at a time. To combine them, pull the orders from each store, convert them into one reporting currency at daily exchange rates and add them up per day, or use a reporting app that connects all your stores, such as Delta Point.</p>
+      </details>
+      <details>
+        <summary>Which exchange rate should I use for reporting?</summary>
+        <p>Use the rate for the day each order or ad cost happened, not today's rate. The European Central Bank publishes a free daily reference rate that is widely used; converting each day separately keeps past months from changing when rates move.</p>
+      </details>
+      <details>
+        <summary>Should I compare markets with platform ROAS or blended ROAS?</summary>
+        <p>Blended ROAS. Platform ROAS depends on each platform's attribution and can count the same order more than once. Blended ROAS uses the revenue the store actually made in that market, divided by all ad spend for that market.</p>
+      </details>
+      <details>
+        <summary>Is one Shopify store with Markets better than one store per country?</summary>
+        <p>It depends on how different your markets are. One store is simpler to run; separate stores give more freedom over catalogue, prices, payments and teams per country. Either way, report revenue and ad spend per market in one currency.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="cta-box">
+      <h2>All your stores and markets in one dashboard</h2>
+      <p>Delta Point combines every Shopify store with your ad and email platforms, in EUR, USD or GBP at daily ECB rates.</p>
+      <a class="btn" href="/#pricing">See plans</a>
+    </div>
+  </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <address class="company">
+        <strong>Delta Point by Wave3, d. o. o.</strong><br>
+        Einspielerjeva ulica 13, 1000 Ljubljana, Slovenia<br>
+        Reg. no. 9022163000 &middot; VAT ID SI62933671<br>
+        <a href="mailto:info@wave-3.com">info@wave-3.com</a>
+      </address>
+      <div class="footer-links">
+        <a href="/roas-calculator/">ROAS calculator</a>
+        <a href="/guides/multi-store-shopify-reporting/">Multi-store reporting guide</a>
+        <a href="/shopify/">Shopify app</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="https://webhooks.deltapoint.io/legal/terms">Terms</a>
+        <a href="https://webhooks.deltapoint.io/legal/dpa">Data Processing Agreement</a>
+        <a href="https://webhooks.deltapoint.io/legal/subprocessors">Sub-processors</a>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "3774a23c984a430c8f65936c74028e81"}'></script>
+</body>
+</html>
