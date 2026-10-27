@@ -46,10 +46,7 @@ EARLY_ACCESS = "mailto:info@wave-3.com?subject=Delta%20Point%20early%20access"
 # Menu: (label, href, shown on phones). Guides and tools go on /resources/, not here.
 NAV = [("Features", "/#features", False), ("Pricing", "/#pricing", True),
        ("FAQ", "/#faq", False), ("Resources", "/resources/", True)]
-# Privacy: the one policy for the app and this site. Google's OAuth branding
-# check wants the homepage to link to the exact URL on the consent screen.
-FOOTER = [("Resources", "/resources/"), ("Shopify app", "/shopify/"),
-          ("Privacy", "https://webhooks.deltapoint.io/legal/privacy"),
+FOOTER = [("Resources", "/resources/"), ("Shopify app", "/shopify/"), ("Privacy", "/privacy.html"),
           ("Terms", "https://webhooks.deltapoint.io/legal/terms"),
           ("Data Processing Agreement", "https://webhooks.deltapoint.io/legal/dpa"),
           ("Sub-processors", "https://webhooks.deltapoint.io/legal/subprocessors")]
@@ -62,9 +59,8 @@ RESOURCES = [
      "Daily exchange rates, time zones, double counting and blended ROAS per market: one honest number "
      "for a business that sells in many countries."),
 ]
-SITEMAP_PRIORITY = {"/": "1.0", "/shopify/": "0.8", "/roas-calculator/": "0.7", "/resources/": "0.6"}
-# Pages kept only so old links still work (they forward elsewhere): not in the sitemap.
-SITEMAP_SKIP = {"/privacy.html"}
+SITEMAP_PRIORITY = {"/": "1.0", "/shopify/": "0.8", "/roas-calculator/": "0.7", "/resources/": "0.6",
+                    "/privacy.html": "0.3"}
 
 
 def money(n: int, cur: str) -> str:
@@ -246,7 +242,7 @@ def main() -> int:
             if not args.check:
                 path.write_text(out)
 
-    urls = sorted((url_of(p) for p in pages if url_of(p) not in SITEMAP_SKIP), key=lambda u: (u != "/", u))
+    urls = sorted((url_of(p) for p in pages), key=lambda u: (u != "/", u))
     sm = SITE / "sitemap.xml"
     old = sm.read_text() if sm.exists() else ""
     new = sitemap_xml(old, urls, changed, dt.date.today().isoformat())
