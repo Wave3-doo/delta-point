@@ -46,7 +46,10 @@ EARLY_ACCESS = "mailto:info@wave-3.com?subject=Delta%20Point%20early%20access"
 # Menu: (label, href, shown on phones). Guides and tools go on /resources/, not here.
 NAV = [("Features", "/#features", False), ("Pricing", "/#pricing", True),
        ("FAQ", "/#faq", False), ("Resources", "/resources/", True)]
+# App privacy policy: Google's OAuth branding check wants the homepage to link
+# to the exact policy URL on the consent screen.
 FOOTER = [("Resources", "/resources/"), ("Shopify app", "/shopify/"), ("Privacy", "/privacy.html"),
+          ("App privacy policy", "https://webhooks.deltapoint.io/legal/privacy"),
           ("Terms", "https://webhooks.deltapoint.io/legal/terms"),
           ("Data Processing Agreement", "https://webhooks.deltapoint.io/legal/dpa"),
           ("Sub-processors", "https://webhooks.deltapoint.io/legal/subprocessors")]
